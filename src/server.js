@@ -22,5 +22,11 @@ const wss = new WebSocket.Server({server});
 // http 서버 위에 webSocket 서버를 만듬
 // 같은 서버에서 http와 ws가 같은 포트에서 작동
 // 뒤의 Server는 http를 사용하고 싶지 않으면 쓰지 않는다(필수가 아님)
+function handleConnection(socket) {
+    console.log(socket)
+}
+wss.on("connection", handleConnection);
+// webSocket Events
+
 server.listen(3000, handleListen);
 
