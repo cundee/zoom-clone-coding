@@ -22,6 +22,8 @@ wsServer.on("connection", (socket) => {
     socket.on("enter_room", (roomName, done) => {
         socket.join(roomName);
         done();
+        socket.to(roomName).emit("welcome");
+        // socketIO가 '자신을 제외하고' roomName에 있는 모든 사람들에게 welcome 이벤트를 emit
     });
 })
 
