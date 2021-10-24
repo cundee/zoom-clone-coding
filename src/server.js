@@ -15,13 +15,17 @@ app.get("/*", (req,res) => res.redirect("/"));
 
 const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
-// Socket IO는 webSocket보다 더 많은 기능을 제공한다
-// 기본 브라우저에 있는 webSocket만을 사용하는 것이 아니기 때문에 브라우저에도 socket IO를 설치해야한다
-// '/socket.io/socket.io.js' url을 제공
 
 wsServer.on("connection", (socket) => {
-    console.log(socket);
-    // webSocket이 아닌 socket IO의 socket이 불려온다
+    socket.on("enter_room", (msg, done) => {
+        console.log(msg);
+        setTimeout(() => {
+            done();
+        }, 5000);
+    // message 뿐만이 아닌 원하는 이벤트인 room을 불러온다
+    // msg에 보내진 객체(메세지)를 받고
+    // done에 보내진 함수를 받는다. 이 함수는 백엔드에서 호출되지만 프론트엔드에서 실행이 된다!
+    });
 })
 
 
