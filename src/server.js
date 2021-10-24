@@ -1,6 +1,7 @@
 // 백엔드
 import http from "http";
-import WebSocket from "ws";
+import SocketIO from "socket.io";
+// SocketIO import
 import express from "express";
 
 const app = express();
@@ -11,12 +12,22 @@ app.use("/public", express.static(__dirname + "/public"));
 app.get("/", (req,res) => res.render("home"));
 app.get("/*", (req,res) => res.redirect("/"));
 
-const handleListen = () => console.log('Listening on http://localhost:3000')
 
-const server = http.createServer(app);
-const wss = new WebSocket.Server({server}); 
+const httpServer = http.createServer(app);
+const wsServer = SocketIO(httpServer);
+// Socket IO는 webSocket보다 더 많은 기능을 제공한다
+// 기본 브라우저에 있는 webSocket만을 사용하는 것이 아니기 때문에 브라우저에도 socket IO를 설치해야한다
+// '/socket.io/socket.io.js' url을 제공
 
-const sockets = [];
+wsServer.on("connection", (socket) => {
+    console.log(socket);
+    // webSocket이 아닌 socket IO의 socket이 불려온다
+})
+
+
+
+
+/* const sockets = [];
 
 wss.on("connection", (socket) => {
     sockets.push(socket);
@@ -38,8 +49,9 @@ wss.on("connection", (socket) => {
         // JSON에서 type을 확인하고 그에 해당하는 payload를 보내준다
         }
     })
-});
+}); */
 
-server.listen(3000, handleListen);
+const handleListen = () => console.log('Listening on http://localhost:3000')
+httpServer.listen(3000, handleListen);
 
 
