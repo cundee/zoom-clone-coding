@@ -16,17 +16,22 @@ const handleListen = () => console.log('Listening on http://localhost:3000')
 const server = http.createServer(app);
 const wss = new WebSocket.Server({server}); 
 
+const sockets = [];
+// 연결된 브라우저를 담는 array
+// socket은 연결되는 브라우저마다 새롭게 생긴다
+// 서로 다른 브라우저끼리 연결하기 위해 사용
+// sockets에 있는 모든 브라우저에 메세지가 전송됨
+
 wss.on("connection", (socket) => {
+    sockets.push(socket);
+    // 브라우저가 연결되어 socket이 만들어지면 array에 담음
     console.log("Connerted to browser");
-    // 브라우저와 연결되면 서버에 이벤트 발생
     socket.on("close", () => console.log("Disconnected from the browser"));
-    // browser 탭을 닫으면 서버에 이벤트 발생
     socket.on("message", (message) => {
-        console.log(message.toString('utf8'));
+        sockets.forEach(aSocket => aSocket.send(message.toString('utf-8')));
+        // 프론트엔드로부터 받은 메세지를 다시 똑같이 보냄
+        // sockets에 있는 모든 소켓(브라우저)들에게 같은 메세지를 보낸다
     })
-    // 브라우저로부터 메세지를 받으면 이벤트가 발생
-    socket.send("hello!!!");
-    // socket의 메소드로 socket에 메세지를 보냄
 });
 
 server.listen(3000, handleListen);
