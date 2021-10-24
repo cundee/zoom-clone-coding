@@ -17,14 +17,22 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
-    socket.on("enter_room", (msg, done) => {
-        console.log(msg);
+    socket.onAny((event) => {
+        console.log(`Socket Event: ${event}`);
+    })
+    // socket의 이벤트가 무엇이지 알려줌
+    socket.on("enter_room", (roomName, done) => {
+        console.log(socket.id);
+        // socket의 id
+        console.log(socket.rooms);
+        // socket(유저)이 어떤 room에 있는지 알려줌
+        // room의 id와 user의 id는 같다
+        socket.join(roomName);
+        // room에 들여보내주는 socketIO의 기능
+        console.log(socket.rooms);
         setTimeout(() => {
-            done();
+            done("hello form the backend");
         }, 5000);
-    // message 뿐만이 아닌 원하는 이벤트인 room을 불러온다
-    // msg에 보내진 객체(메세지)를 받고
-    // done에 보내진 함수를 받는다. 이 함수는 백엔드에서 호출되지만 프론트엔드에서 실행이 된다!
     });
 })
 
