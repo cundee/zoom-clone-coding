@@ -1,7 +1,6 @@
 // 백엔드
 import http from "http";
 import SocketIO from "socket.io";
-// SocketIO import
 import express from "express";
 
 const app = express();
@@ -20,19 +19,9 @@ wsServer.on("connection", (socket) => {
     socket.onAny((event) => {
         console.log(`Socket Event: ${event}`);
     })
-    // socket의 이벤트가 무엇이지 알려줌
     socket.on("enter_room", (roomName, done) => {
-        console.log(socket.id);
-        // socket의 id
-        console.log(socket.rooms);
-        // socket(유저)이 어떤 room에 있는지 알려줌
-        // room의 id와 user의 id는 같다
         socket.join(roomName);
-        // room에 들여보내주는 socketIO의 기능
-        console.log(socket.rooms);
-        setTimeout(() => {
-            done("hello form the backend");
-        }, 5000);
+        done();
     });
 })
 
