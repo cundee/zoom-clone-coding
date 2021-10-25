@@ -1,6 +1,7 @@
 // 백엔드
 import http from "http";
-import SocketIO from "socket.io";
+import {Server} from "socket.io";
+import { instrument } from "@socket.io/admin-ui";
 import express from "express";
 
 const app = express();
@@ -13,7 +14,17 @@ app.get("/*", (req,res) => res.redirect("/"));
 
 
 const httpServer = http.createServer(app);
-const wsServer = SocketIO(httpServer);
+const wsServer = new Server(httpServer, {
+    cors: {
+        origin: ["https://admin.socket.io"],
+        credentials: true,
+    },
+    // 위의 url에서 localhost:3000에 액세스
+    // 온라인 데모가 작동하는데 필요한 환경설정
+});
+instrument(wsServer, {
+    auth: false,
+});
 
 function publicRooms() {
     const {
@@ -32,7 +43,6 @@ function publicRooms() {
 
 function countRoom(roomName) {
     return wsServer.sockets.adapter.rooms.get(roomName)?.size;
-    // roomName에 해당하는 방을 찾아서 방의 크기(그 안의 user의 수)를 반환
 }
 
 wsServer.on("connection", (socket) => {
@@ -44,12 +54,10 @@ wsServer.on("connection", (socket) => {
         socket.join(roomName);
         done();
         socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));
-        // welcome 이벤트를 emit 할 때 countRoom도 함께 보냄
         wsServer.sockets.emit("room_change", publicRooms());
     });
     socket.on("disconnecting", () => {
         socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname, countRoom(room) -1));
-        // 룸에서 나가기 직전이기 때문에 room 변수를 쓸 수 있다. 다만 아직 나가기 전이기 때문에 자신도 포함되서 계산되므로 1을 빼준다
     })
     socket.on("disconnect", () => {
         wsServer.sockets.emit("room_change", publicRooms());
