@@ -65,6 +65,23 @@ socket.on("welcome", (user) => {
 socket.on("bye", (user) => {
     addMessage(`${user} left ㅠㅠ`);
  })
- // 어떤 user가 나가고 들어왔는지 알려준다
 
- socket.on("new_message", addMessage);
+socket.on("new_message", addMessage);
+
+socket.on("room_change", (rooms) => {
+    const roomList = welcome.querySelector("ul");
+    roomList.innerHTML = "";
+    // 방이 중복되서 리스트에 찍히는걸 막기 위해 roomList를 매번 초기화해준다
+    if (rooms.length === 0) {
+        roomList.innerHTML = "";
+        return;
+    }
+    // 방이 아무것도 없으면 roomList에 빈 문자열을 반환한다
+    rooms.forEach((room) => {
+        const li = document.createElement("li");
+        li.innerText = room;
+        roomList.append(li);
+    })
+    // 방이 생성될 때마다 li를 만들어 방 목록을 만든다
+});
+

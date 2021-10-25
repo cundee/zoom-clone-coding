@@ -21,14 +21,12 @@ function publicRooms() {
             adapter: { sids, rooms },
         },
     } = wsServer;
-    // wsServer.sockets.adapter에서 sids와 rooms를 가져옴
     const publicRooms = [];
     rooms.forEach((_, key) => {
         if (sids.get(key) === undefined) {
             publicRooms.push(key);
         }
     });
-    // rooms의 key들을 sids와 비교하여 일치하지 않는 key는 public room이 된다
     return publicRooms;
 }
 
@@ -41,9 +39,16 @@ wsServer.on("connection", (socket) => {
         socket.join(roomName);
         done();
         socket.to(roomName).emit("welcome", socket.nickname);
+        wsServer.sockets.emit("room_change", publicRooms());
+        // 방이 생성되었음을 알리는 이벤트를 서버에 있는 모든 socket들에게 보냄
     });
     socket.on("disconnecting", () => {
         socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname));
+    })
+    socket.on("disconnect", () => {
+        wsServer.sockets.emit("room_change", publicRooms());
+        // 방을 나가서 아무도 없으면 방이 사라졌음을 알림
+        // disconnecting 이벤트는 방을 떠나기 직전에 이벤트가 발생하기 때문에 나간 후에 발생하는 disconnect 이벤트를 사용한다.
     })
     socket.on("new_message", (msg, room, done) => {
         socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
