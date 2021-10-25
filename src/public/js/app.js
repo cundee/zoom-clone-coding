@@ -4,22 +4,39 @@ const socket = io();
 const myFace = document.getElementById("myFace");
 const muteBtn = document.getElementById("mute");
 const cameraBtn = document.getElementById("camera");
+const camerasSelect = document.getElementById("cameras");
 
 let myStream;
-// stream은 비디오와 오디오의 결합
 let muted = false;
 let cameraOff = false;
-// 음소거와 카메라 끄기의 상태를 위한 변수
+
+async function getCameras() {
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        // user의 장치에 접근하여 정보를 가져온다 
+        const cameras = devices.filter((device) => device.kind === "videoinput");
+        // 카메라 장치들의 정보만을 가져온다
+        cameras.forEach((camera) => {
+            const option = document.createElement("option");
+            option.value = camera.deviceId;
+            option.innerText = camera.label;
+            camerasSelect.appendChild(option);
+        });
+        // 가지고 있는 카메라 장치들을 option에 추가한다.
+    } catch (e) {
+        console.log(e);
+    }
+}
+
 
 async function getMedia() {
     try {
         myStream = await navigator.mediaDevices.getUserMedia({
-            audio: false,
+            audio: true,
             video: true,
-            // constraints : 우리가 얻고싶은것
         });
         myFace.srcObject = myStream;
-        // 카메라 화면이 나옴
+        await getCameras();
     } catch (e) {
         console.log(e)
     }
@@ -28,6 +45,7 @@ async function getMedia() {
 getMedia();
 
 function handleMuteClick() {
+    myStream.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
     if(!muted) {
         muteBtn.innerText = "Unmute";
         muted = true;
@@ -37,6 +55,7 @@ function handleMuteClick() {
     }
 }
 function handleCameraClick() {
+    myStream.getVideoTracks().forEach((track) => (track.enabled = !track.enabled));
     if (cameraOff) {
         cameraBtn.innerText = "Turn Camera Off";
         cameraOff = false;
