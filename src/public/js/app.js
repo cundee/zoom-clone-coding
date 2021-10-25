@@ -58,30 +58,33 @@ const roomNameForm = welcome.querySelector("#roomname");
 nameForm.addEventListener("submit", handleNicknameSubmit);
 roomNameForm.addEventListener("submit", handleRoomSubmit);
 
-socket.on("welcome", (user) => {
-   addMessage(`${user} joined!`);
+socket.on("welcome", (user, newCount) => {
+    const h3 = room.querySelector("h3");
+    h3.innerText = `Room ${roomName} (${newCount})`;
+    addMessage(`${user} joined!`);
 })
 
-socket.on("bye", (user) => {
+socket.on("bye", (user, newCount) => {
+    const h3 = room.querySelector("h3");
+    h3.innerText = `Room ${roomName} (${newCount})`;
     addMessage(`${user} left ㅠㅠ`);
  })
+// 방에 들어오거 나갈 때 유저의 수를 방 제목 옆에 표시한다
+
 
 socket.on("new_message", addMessage);
 
 socket.on("room_change", (rooms) => {
     const roomList = welcome.querySelector("ul");
     roomList.innerHTML = "";
-    // 방이 중복되서 리스트에 찍히는걸 막기 위해 roomList를 매번 초기화해준다
     if (rooms.length === 0) {
         roomList.innerHTML = "";
         return;
     }
-    // 방이 아무것도 없으면 roomList에 빈 문자열을 반환한다
     rooms.forEach((room) => {
         const li = document.createElement("li");
         li.innerText = room;
         roomList.append(li);
     })
-    // 방이 생성될 때마다 li를 만들어 방 목록을 만든다
 });
 

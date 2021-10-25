@@ -30,6 +30,11 @@ function publicRooms() {
     return publicRooms;
 }
 
+function countRoom(roomName) {
+    return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+    // roomName에 해당하는 방을 찾아서 방의 크기(그 안의 user의 수)를 반환
+}
+
 wsServer.on("connection", (socket) => {
     socket["nickname"] = "Anon";
     socket.onAny((event) => {
@@ -38,17 +43,16 @@ wsServer.on("connection", (socket) => {
     socket.on("enter_room", (roomName, done) => {
         socket.join(roomName);
         done();
-        socket.to(roomName).emit("welcome", socket.nickname);
+        socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));
+        // welcome 이벤트를 emit 할 때 countRoom도 함께 보냄
         wsServer.sockets.emit("room_change", publicRooms());
-        // 방이 생성되었음을 알리는 이벤트를 서버에 있는 모든 socket들에게 보냄
     });
     socket.on("disconnecting", () => {
-        socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname));
+        socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname, countRoom(room) -1));
+        // 룸에서 나가기 직전이기 때문에 room 변수를 쓸 수 있다. 다만 아직 나가기 전이기 때문에 자신도 포함되서 계산되므로 1을 빼준다
     })
     socket.on("disconnect", () => {
         wsServer.sockets.emit("room_change", publicRooms());
-        // 방을 나가서 아무도 없으면 방이 사라졌음을 알림
-        // disconnecting 이벤트는 방을 떠나기 직전에 이벤트가 발생하기 때문에 나간 후에 발생하는 disconnect 이벤트를 사용한다.
     })
     socket.on("new_message", (msg, room, done) => {
         socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
