@@ -15,9 +15,24 @@ app.get("/*", (req,res) => res.redirect("/"));
 const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
+function publicRooms() {
+    const {
+        sockets: {
+            adapter: { sids, rooms },
+        },
+    } = wsServer;
+    // wsServer.sockets.adapter에서 sids와 rooms를 가져옴
+    const publicRooms = [];
+    rooms.forEach((_, key) => {
+        if (sids.get(key) === undefined) {
+            publicRooms.push(key);
+        }
+    });
+    // rooms의 key들을 sids와 비교하여 일치하지 않는 key는 public room이 된다
+    return publicRooms;
+}
+
 wsServer.on("connection", (socket) => {
-    // wsServer.socketJoin("공지방");
-    // 서버에 들어오는 모든 socket들을 공지방에 입장시킨다
     socket["nickname"] = "Anon";
     socket.onAny((event) => {
         console.log(`Socket Event: ${event}`);
@@ -34,9 +49,7 @@ wsServer.on("connection", (socket) => {
         socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
         done();
     })
-    // socket.nickname을 함께 보낸다
     socket.on("nickname", (nickname) => {socket["nickname"] = nickname})
-    // nickname을 받으면 socket의 nickname property를 변경
 })
 
 
