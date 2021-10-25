@@ -16,24 +16,27 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
+    // wsServer.socketJoin("공지방");
+    // 서버에 들어오는 모든 socket들을 공지방에 입장시킨다
+    socket["nickname"] = "Anon";
     socket.onAny((event) => {
         console.log(`Socket Event: ${event}`);
     })
     socket.on("enter_room", (roomName, done) => {
         socket.join(roomName);
         done();
-        socket.to(roomName).emit("welcome");
+        socket.to(roomName).emit("welcome", socket.nickname);
     });
     socket.on("disconnecting", () => {
-        socket.rooms.forEach(room => socket.to(room).emit("bye"));
-    // 클라이언트와 서버의 연결이 끊어지면 room 안에 있는 socket들에게 bye이벤트를 보냄
+        socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname));
     })
     socket.on("new_message", (msg, room, done) => {
-        socket.to(room).emit("new_message", msg);
+        socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
         done();
     })
-    // 프론트로부터 new_message 이벤트를 받고, 함께 온 내용들을 사용해서 room에 있는 socket에게 새로운 이벤트를 emit
-    // done()을 이용해 자신의 채팅창에도 메세지가 입력되게 실행시킴
+    // socket.nickname을 함께 보낸다
+    socket.on("nickname", (nickname) => {socket["nickname"] = nickname})
+    // nickname을 받으면 socket의 nickname property를 변경
 })
 
 
