@@ -23,8 +23,17 @@ wsServer.on("connection", (socket) => {
         socket.join(roomName);
         done();
         socket.to(roomName).emit("welcome");
-        // socketIO가 '자신을 제외하고' roomName에 있는 모든 사람들에게 welcome 이벤트를 emit
     });
+    socket.on("disconnecting", () => {
+        socket.rooms.forEach(room => socket.to(room).emit("bye"));
+    // 클라이언트와 서버의 연결이 끊어지면 room 안에 있는 socket들에게 bye이벤트를 보냄
+    })
+    socket.on("new_message", (msg, room, done) => {
+        socket.to(room).emit("new_message", msg);
+        done();
+    })
+    // 프론트로부터 new_message 이벤트를 받고, 함께 온 내용들을 사용해서 room에 있는 socket에게 새로운 이벤트를 emit
+    // done()을 이용해 자신의 채팅창에도 메세지가 입력되게 실행시킴
 })
 
 
