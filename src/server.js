@@ -15,16 +15,16 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
-  socket.on("join_room", (roomName, done) => {
+  socket.on("join_room", (roomName) => {
     socket.join(roomName);
-    done();
     socket.to(roomName).emit("welcome");
   });
   socket.on("offer", (offer, roomName) => {
     socket.to(roomName).emit("offer", offer);
-    // 방을 만든 브라우저로부터 offer와 roomName을 받으면
-    // 그 roomName을 가진 초대받은 브라우저에게 offer를 보냄
-  })
+  });
+  socket.on("answer", (answer, roomName) => {
+    socket.to(roomName).emit("answer", answer);
+  });
 });
 
 const handleListen = () => console.log("Listening on http://localhost:3000");

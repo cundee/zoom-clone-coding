@@ -92,19 +92,22 @@ camerasSelect.addEventListener("input", handleCameraChange);
 // Welcome Form (join a room)
 
 const welcome = document.getElementById("welcome");
-welcomeForm = welcome.querySelector("form");
+const welcomeForm = welcome.querySelector("form");
 
-async function startMedia() {
+async function initCall() {
   welcome.hidden = true;
   call.hidden = false;
   await getMedia();
   makeConnection();
 }
 
-function handleWelcomeSubmit(event) {
+async function handleWelcomeSubmit(event) {
   event.preventDefault();
   const input = welcomeForm.querySelector("input");
-  socket.emit("join_room", input.value, startMedia);
+  await initCall();
+  socket.emit("join_room", input.value);
+  // WebSocket이 너무 빨라서 방에 들어오는 사람의 myPeerConncetion이 만들어지지 못한다
+  // 그래서 initCall의 순서를 바꿔줌
   roomName = input.value;
   input.value = "";
 }
@@ -115,18 +118,24 @@ welcomeForm.addEventListener("submit", handleWelcomeSubmit);
 
 socket.on("welcome", async () => {
   const offer = await myPeerConnection.createOffer();
-  // 방을 만든 사람에게 offer(다른 브라우저를 부를 수 있는 초대장)을 준다
   myPeerConnection.setLocalDescription(offer);
-  // 받은 offer로 연결을 구성
   socket.emit("offer", offer, roomName);
-  // 서버에 offer와 roomName을 보냄
 });
-// Peer A : 방을 만든 사람
 
-socket.on("offer", (offer) => {
-  console.log(offer);
-})
-// Peer B : 방에 들어온 사람
+socket.on("offer", async (offer) => {
+  myPeerConnection.setRemoteDescription(offer);
+  // offer를 받아서 Description 설정
+  const answer = await myPeerConnection.createAnswer();
+  // Answer 생성
+  myPeerConnection.setLocalDescription(answer);
+  socket.emit("answer", answer, roomName);
+  // 생성한 answer를 Peer A에게 보냄
+});
+
+socket.on("answer", (answer) => {
+  myPeerConnection.setRemoteDescription(answer);
+});
+// 받은 asnwer로 RometeDescription 설정
 
 // RTC Code
 
@@ -135,6 +144,4 @@ function makeConnection() {
   myStream
     .getTracks()
     .forEach((track) => myPeerConnection.addTrack(track, myStream));
-  // 연결할 대상들에게 각각의 peer를 만들어주고
-  // peer에게 해당하는 오디오, 비디오 트랙을 넣어준다
 }
