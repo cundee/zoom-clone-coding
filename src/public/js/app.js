@@ -106,8 +106,6 @@ async function handleWelcomeSubmit(event) {
   const input = welcomeForm.querySelector("input");
   await initCall();
   socket.emit("join_room", input.value);
-  // WebSocket이 너무 빨라서 방에 들어오는 사람의 myPeerConncetion이 만들어지지 못한다
-  // 그래서 initCall의 순서를 바꿔줌
   roomName = input.value;
   input.value = "";
 }
@@ -124,24 +122,39 @@ socket.on("welcome", async () => {
 
 socket.on("offer", async (offer) => {
   myPeerConnection.setRemoteDescription(offer);
-  // offer를 받아서 Description 설정
   const answer = await myPeerConnection.createAnswer();
-  // Answer 생성
   myPeerConnection.setLocalDescription(answer);
   socket.emit("answer", answer, roomName);
-  // 생성한 answer를 Peer A에게 보냄
 });
 
 socket.on("answer", (answer) => {
   myPeerConnection.setRemoteDescription(answer);
 });
-// 받은 asnwer로 RometeDescription 설정
+
+socket.on("ice", (ice) => {
+  myPeerConnection.addIceCandidate(ice);
+});
 
 // RTC Code
 
 function makeConnection() {
   myPeerConnection = new RTCPeerConnection();
+  myPeerConnection.addEventListener("icecandidate", handleIce);
+  // IceCandidate : 브라우저가 서로 소통할 수 있게 해주는 방법. 어떤 소통 방법이 가장 좋은 방법인지 제안하는 중재자 역할 
+  myPeerConnection.addEventListener("addstream", handleAddStream);
+  // peer의 stream을 가져온다
   myStream
     .getTracks()
     .forEach((track) => myPeerConnection.addTrack(track, myStream));
+}
+
+function handleIce(data) {
+  socket.emit("ice", data.candidate, roomName);
+  // candidate를 서로 주고받음
+}
+
+function handleAddStream(data) {
+  const peerFace = document.getElementById("peerFace");
+  peerFace.srcObject = data.stream;
+  // peer의 화면을 띄운다
 }
