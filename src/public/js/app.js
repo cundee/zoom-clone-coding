@@ -83,6 +83,16 @@ function handleCameraClick() {
 
 async function handleCameraChange() {
   await getMedia(camerasSelect.value);
+  if (myPeerConnection) {
+    const videoTrack = myStream.getVideoTrack()[0];
+    const videoSender = myPeerConnection
+      .getSenders()
+      .find((sender) => sender.track.kind === "video");
+    videoSender.replaceTrack(videoTrack);
+  }
+  // Sender : peer로 보내진 media stream track을 컨트롤하게 해준다
+  // 내 화면에 나오는 myStream과 peer에게 보내지는 Stream, 즉 2개의 track이 있다
+  // Sender를 이용해 myStream을 peer에 보내진 track에 똑같이 대체시킨다
 }
 
 muteBtn.addEventListener("click", handleMuteClick);
@@ -140,7 +150,7 @@ socket.on("ice", (ice) => {
 function makeConnection() {
   myPeerConnection = new RTCPeerConnection();
   myPeerConnection.addEventListener("icecandidate", handleIce);
-  // IceCandidate : 브라우저가 서로 소통할 수 있게 해주는 방법. 어떤 소통 방법이 가장 좋은 방법인지 제안하는 중재자 역할 
+  // IceCandidate : 브라우저가 서로 소통할 수 있게 해주는 방법. 어떤 소통 방법이 가장 좋은 방법인지 제안하는 중재자 역할
   myPeerConnection.addEventListener("addstream", handleAddStream);
   // peer의 stream을 가져온다
   myStream
