@@ -14,6 +14,7 @@ let muted = false;
 let cameraOff = false;
 let roomName;
 let myPeerConnection;
+let myDataChannel;
 
 async function getCameras() {
   try {
@@ -122,12 +123,24 @@ welcomeForm.addEventListener("submit", handleWelcomeSubmit);
 // Socket Call
 
 socket.on("welcome", async () => {
+  myDataChannel = myPeerConnection.createDataChannel("chat");
+  // offer를 만드는 peer에서 datachanner을 만듬
+  myDataChannel.addEventListener("message", (event) => {
+    console.log(event.data);
+  });
   const offer = await myPeerConnection.createOffer();
   myPeerConnection.setLocalDescription(offer);
   socket.emit("offer", offer, roomName);
 });
 
 socket.on("offer", async (offer) => {
+  myPeerConnection.addEventListener("datachannel", (event) => {
+    myDataChannel = event.channel;
+    myDataChannel.addEventListener("message", (event) => {
+      console.log(event.data);
+    });
+  });
+  // offer를 받는 peer에서 datachannel을 받고 메세지를 주고받음
   myPeerConnection.setRemoteDescription(offer);
   const answer = await myPeerConnection.createAnswer();
   myPeerConnection.setLocalDescription(answer);
@@ -158,9 +171,6 @@ function makeConnection() {
       },
     ],
   });
-  // 공용주소를 알아내기 위해 STUN 서버 사용
-  // 테스트를 위해 google에서 가져옴
-  // 서로 다른 네트워크에서도 연결 가능
   myPeerConnection.addEventListener("icecandidate", handleIce);
   myPeerConnection.addEventListener("addstream", handleAddStream);
   myStream
