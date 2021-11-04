@@ -122,11 +122,32 @@ welcomeForm.addEventListener("submit", handleWelcomeSubmit);
 
 // Socket Call
 
+function addMessage(message) {
+  const ul = call.querySelector("#chat ul");
+  const li = document.createElement("li");
+  li.innerText = message;
+  ul.appendChild(li);
+}
+
+function handleMessageSubmit(event) {
+  event.preventDefault();
+  const input = call.querySelector("#msg input");
+  const value = input.value;
+  myDataChannel.send(value);
+  addMessage(`You : ${value}`);
+  input.value = "";
+}
+
 socket.on("welcome", async () => {
   myDataChannel = myPeerConnection.createDataChannel("chat");
-  // offer를 만드는 peer에서 datachanner을 만듬
+  myDataChannel.addEventListener("open", () => {
+    console.log("open!");
+    const msgForm = call.querySelector("#msg");
+    msgForm.addEventListener("submit", handleMessageSubmit);
+  });
   myDataChannel.addEventListener("message", (event) => {
     console.log(event.data);
+    addMessage(`Friend : ${event.data}`);
   });
   const offer = await myPeerConnection.createOffer();
   myPeerConnection.setLocalDescription(offer);
@@ -136,11 +157,17 @@ socket.on("welcome", async () => {
 socket.on("offer", async (offer) => {
   myPeerConnection.addEventListener("datachannel", (event) => {
     myDataChannel = event.channel;
+    myDataChannel.send("Some joined!");
+    myDataChannel.addEventListener("open", () => {
+      console.log("open!");
+      const msgForm = call.querySelector("#msg");
+      msgForm.addEventListener("submit", handleMessageSubmit);
+    });
     myDataChannel.addEventListener("message", (event) => {
       console.log(event.data);
+      addMessage(`Friend : ${event.data}`);
     });
   });
-  // offer를 받는 peer에서 datachannel을 받고 메세지를 주고받음
   myPeerConnection.setRemoteDescription(offer);
   const answer = await myPeerConnection.createAnswer();
   myPeerConnection.setLocalDescription(answer);
