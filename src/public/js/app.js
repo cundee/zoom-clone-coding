@@ -170,7 +170,7 @@ socket.on("offer", async (offer) => {
     });
     myDataChannel.addEventListener("message", (event) => {
       console.log(event.data);
-      addMessage(`${event.data}`,"friend");
+      addMessage(`${event.data}`, "friend");
     });
   });
   myPeerConnection.setRemoteDescription(offer);

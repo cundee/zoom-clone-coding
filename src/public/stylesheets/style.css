@@ -1,9 +1,61 @@
+h1 {
+  text-align: center;
+}
+
+#welcome {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+#welcome button {
+  background-color: #4a90e2;
+  width: auto;
+  height: 36px;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 5px;
+  margin-left: 3px;
+}
+
+#welcome input {
+  height: 30px;
+  border-radius: 3px;
+}
+
+#my {
+  display: inline-block;
+  margin-top: 100px;
+  margin-right: 50px;
+  margin-left: 80px;
+}
+
+#peer {
+  display: inline-block;
+}
+
+#chat {
+  display: inline-block;
+  float: right;
+  margin-bottom: 30px;
+}
+
+#chat h3 {
+  text-align: center;
+}
+
 #chatbox {
-  height: 400px;
-  background-color: #d7e4f2;
+  width: 300px;
+  height: 350px;
+  background-color: #ffffff;
   padding: 10px;
   overflow-y: scroll;
   position: relative;
+  border: solid 1px #9e9a9a;
+  border-radius: 7px 7px;
+  margin-left: 10px;
 }
 
 .bubble {
@@ -15,7 +67,7 @@
 }
 
 .friend-bubble {
-  background-color: white;
+  background-color: rgb(177, 233, 247);
   border-radius: 14px 14px 14px 0;
   padding: 7px 15px 7px 15px;
   float: left;
@@ -28,4 +80,49 @@
   padding: 7px 15px 7px 15px;
   float: right;
   clear: both;
+}
+
+#msg {
+  background-color: #fafafa;
+  padding: 10px;
+}
+
+#msg input {
+  width: 250px;
+  height: 40px;
+  float: left;
+  border-radius: 3px;
+  background-color: #ffffff;
+  border: solid 0.5px #d7d7d7;
+  resize: none;
+  padding: 10px;
+  font-size: 14px;
+}
+
+#msg button {
+  background-color: #4a90e2;
+  width: 50px;
+  height: 61px;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-left: 2px;
+  float: left;
+}
+
+#buttons {
+  margin-left: 80px;
+}
+
+#buttons button {
+  background-color: #4a90e2;
+  width: auto;
+  height: 24px;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 5px;
+  float: left;
 }
