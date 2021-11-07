@@ -1,0 +1,31 @@
+#chatbox {
+  height: 400px;
+  background-color: #d7e4f2;
+  padding: 10px;
+  overflow-y: scroll;
+  position: relative;
+}
+
+.bubble {
+  margin: 5px 0;
+  display: inline-block;
+  max-width: 300px;
+  font-size: 14px;
+  position: relative;
+}
+
+.friend-bubble {
+  background-color: white;
+  border-radius: 14px 14px 14px 0;
+  padding: 7px 15px 7px 15px;
+  float: left;
+  clear: both;
+}
+
+.my-bubble {
+  background-color: #fff46d;
+  border-radius: 14px 14px 0px 14px;
+  padding: 7px 15px 7px 15px;
+  float: right;
+  clear: both;
+}

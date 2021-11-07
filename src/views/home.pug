@@ -6,6 +6,7 @@ html(lang="en")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title Noom
         link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+        link(rel="stylesheet", href="/public/stylesheets/style.css")
     body 
         header 
             h1 Noom
@@ -23,7 +24,7 @@ html(lang="en")
                     video#peerFace(autoplay, playsinline, width="400", height="400")
                 div#chat
                     h3 
-                    ul 
+                    div#chatbox
                     form#msg
                         input(placeholder="Typing Message", required, type="text")
                         button Send
