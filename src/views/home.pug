@@ -12,7 +12,10 @@ html(lang="en")
             h1 Elice
         main
             div#welcome
-                form
+                form#name
+                    input(placeholder="Nickname", required, type="text")
+                    button Enter
+                form#roomname
                     input(placeholder="room name", required, type="text")
                     button Enter
             div#call

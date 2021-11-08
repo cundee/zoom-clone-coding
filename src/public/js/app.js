@@ -74,7 +74,7 @@ function handleCameraClick() {
     .getVideoTracks()
     .forEach((track) => (track.enabled = !track.enabled));
   if (cameraOff) {
-    cameraBtn.className = "on"
+    cameraBtn.className = "on";
     cameraOff = false;
   } else {
     cameraBtn.className = "off";
@@ -100,7 +100,14 @@ camerasSelect.addEventListener("input", handleCameraChange);
 // Welcome Form (join a room)
 
 const welcome = document.getElementById("welcome");
-const welcomeForm = welcome.querySelector("form");
+const nameForm = welcome.querySelector("#name");
+const roomNameForm = welcome.querySelector("#roomname");
+
+function handleNicknameSubmit(event) {
+  event.preventDefault();
+  const input = welcome.querySelector("#name input");
+  socket.emit("nickname", input.value);
+}
 
 async function initCall() {
   welcome.hidden = true;
@@ -113,14 +120,14 @@ async function initCall() {
 
 async function handleWelcomeSubmit(event) {
   event.preventDefault();
-  const input = welcomeForm.querySelector("input");
+  const input = roomNameForm.querySelector("input");
   await initCall();
   socket.emit("join_room", input.value);
   roomName = input.value;
   input.value = "";
 }
-
-welcomeForm.addEventListener("submit", handleWelcomeSubmit);
+nameForm.addEventListener("submit", handleNicknameSubmit);
+roomNameForm.addEventListener("submit", handleWelcomeSubmit);
 
 // Socket Call
 
@@ -136,43 +143,61 @@ function addMessage(message, sender) {
   div.appendChild(bubble);
 }
 
-function handleMessageSubmit(event) {
-  event.preventDefault();
-  const input = call.querySelector("#msg input");
-  const value = input.value;
-  myDataChannel.send(value);
-  addMessage(`${value}`, "my");
-  input.value = "";
-}
+// function handleMessageSubmit(event) {
+//   event.preventDefault();
+//   const input = call.querySelector("#msg input");
+//   const value = input.value;
+//   myDataChannel.send(JSON.stringify({"nickname": user, "msg": value}));
+//   addMessage(`${value}`, "my");
+//   input.value = "";
+// }
 
-socket.on("welcome", async () => {
+socket.on("welcome", async (user, newCount) => {
   myDataChannel = myPeerConnection.createDataChannel("chat");
   myDataChannel.addEventListener("open", () => {
     console.log("open!");
     const msgForm = call.querySelector("#msg");
-    msgForm.addEventListener("submit", handleMessageSubmit);
+    msgForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = call.querySelector("#msg input");
+      const value = input.value;
+      myDataChannel.send(JSON.stringify({ nickname: user, msg: value }));
+      addMessage(`${value}`, "my");
+      input.value = "";
+    });
   });
   myDataChannel.addEventListener("message", (event) => {
     console.log(event.data);
-    addMessage(`${event.data}`, "friend");
+    const data = JSON.parse(event.data);
+    addMessage(`${data.nickname} : ${data.msg}`, "friend");
   });
   const offer = await myPeerConnection.createOffer();
   myPeerConnection.setLocalDescription(offer);
   socket.emit("offer", offer, roomName);
 });
 
-socket.on("offer", async (offer) => {
+socket.on("offer", async (offer, user, newCount) => {
   myPeerConnection.addEventListener("datachannel", (event) => {
     myDataChannel = event.channel;
-    myDataChannel.send("Someone joined!");
+    myDataChannel.send(
+      JSON.stringify({ nickname: "bot", msg: `${user} joined!` })
+    );
     myDataChannel.addEventListener("open", () => {
       console.log("open!");
       const msgForm = call.querySelector("#msg");
-      msgForm.addEventListener("submit", handleMessageSubmit);
+      msgForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const input = call.querySelector("#msg input");
+        const value = input.value;
+        myDataChannel.send(JSON.stringify({ nickname: user, msg: value }));
+        addMessage(`${value}`, "my");
+        input.value = "";
+      });
     });
     myDataChannel.addEventListener("message", (event) => {
       console.log(event.data);
-      addMessage(`${event.data}`, "friend");
+      const data = JSON.parse(event.data);
+      addMessage(`${data.nickname} : ${data.msg}`, "friend");
     });
   });
   myPeerConnection.setRemoteDescription(offer);
