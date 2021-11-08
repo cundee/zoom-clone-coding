@@ -62,10 +62,10 @@ function handleMuteClick() {
     .getAudioTracks()
     .forEach((track) => (track.enabled = !track.enabled));
   if (!muted) {
-    muteBtn.innerText = "Unmute";
+    muteBtn.className = "off";
     muted = true;
   } else {
-    muteBtn.innerText = "Mute";
+    muteBtn.className = "on";
     muted = false;
   }
 }
@@ -74,10 +74,10 @@ function handleCameraClick() {
     .getVideoTracks()
     .forEach((track) => (track.enabled = !track.enabled));
   if (cameraOff) {
-    cameraBtn.innerText = "Turn Camera Off";
+    cameraBtn.className = "on"
     cameraOff = false;
   } else {
-    cameraBtn.innerText = "Turn Camera On";
+    cameraBtn.className = "off";
     cameraOff = true;
   }
 }
@@ -107,6 +107,8 @@ async function initCall() {
   call.hidden = false;
   await getMedia();
   makeConnection();
+  handleMuteClick();
+  handleCameraClick();
 }
 
 async function handleWelcomeSubmit(event) {
