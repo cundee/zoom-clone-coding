@@ -107,7 +107,9 @@ function handleNicknameSubmit(event) {
   event.preventDefault();
   const input = welcome.querySelector("#name input");
   socket.emit("nickname", input.value);
-  input.value = "";
+  const button = welcome.querySelector("#name button");
+  button.className = "save";
+  button.innerText = "Save";
 }
 
 async function initCall() {
@@ -132,16 +134,24 @@ roomNameForm.addEventListener("submit", handleWelcomeSubmit);
 
 // Socket Call
 
-function addMessage(message, sender) {
+function addMessage(message, user, sender) {
   const div = call.querySelector("#chatbox");
+  const chat = document.createElement("div");
+  const name = document.createElement("div");
   const bubble = document.createElement("div");
+
   if (sender === "friend") {
     bubble.className = "friend-bubble bubble";
+    name.innerText = user;
   } else {
     bubble.className = "my-bubble bubble";
   }
   bubble.innerText = message;
-  div.appendChild(bubble);
+  chat.className = "chatbox";
+  name.className = "namebox";
+  chat.appendChild(name);
+  chat.appendChild(bubble);
+  div.appendChild(chat);
 }
 
 // function handleMessageSubmit(event) {
@@ -163,7 +173,7 @@ socket.on("welcome", async (user, newCount) => {
       const input = call.querySelector("#msg input");
       const value = input.value;
       myDataChannel.send(JSON.stringify({ nickname: user, msg: value }));
-      addMessage(`${value}`, "my");
+      addMessage(`${value}`, user, "my");
       input.value = "";
     });
   });
@@ -171,9 +181,9 @@ socket.on("welcome", async (user, newCount) => {
     console.log(event.data);
     const data = JSON.parse(event.data);
     if (data.nickname == "bot") {
-      addMessage(`${data.nickname} : ${user} joined!`, "friend");
+      addMessage(`${user} joined!`, "Bot", "friend");
     } else {
-      addMessage(`${user} : ${data.msg}`, "friend");
+      addMessage(`${data.msg}`, user, "friend");
     }
   });
   const offer = await myPeerConnection.createOffer();
@@ -185,9 +195,7 @@ socket.on("offer", async (offer, user, newCount) => {
   console.log("I'm Offer!");
   myPeerConnection.addEventListener("datachannel", (event) => {
     myDataChannel = event.channel;
-    myDataChannel.send(
-      JSON.stringify({ nickname: "bot" })
-    );
+    myDataChannel.send(JSON.stringify({ nickname: "bot" }));
     myDataChannel.addEventListener("open", () => {
       console.log("open!");
       const msgForm = call.querySelector("#msg");
@@ -196,14 +204,14 @@ socket.on("offer", async (offer, user, newCount) => {
         const input = call.querySelector("#msg input");
         const value = input.value;
         myDataChannel.send(JSON.stringify({ nickname: user, msg: value }));
-        addMessage(`${value}`, "my");
+        addMessage(`${value}`, user, "my");
         input.value = "";
       });
     });
     myDataChannel.addEventListener("message", (event) => {
       console.log(event.data);
       const data = JSON.parse(event.data);
-      addMessage(`${user} : ${data.msg}`, "friend");
+      addMessage(`${data.msg}`, user, "friend");
     });
   });
   myPeerConnection.setRemoteDescription(offer);

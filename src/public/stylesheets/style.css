@@ -10,7 +10,7 @@ h1 {
 
 #welcome button {
   background-color: #4a90e2;
-  width: auto;
+  width: 45px;
   height: 36px;
   color: white;
   border: none;
@@ -58,12 +58,21 @@ h1 {
   margin-left: 10px;
 }
 
+.chatbox {
+  display: block;
+  position: relative;
+}
+
+.namebox {
+  clear: both;
+}
+
 .bubble {
   margin: 5px 0;
-  display: inline-block;
+  
   max-width: 300px;
   font-size: 14px;
-  position: relative;
+  
 }
 
 .friend-bubble {
@@ -144,4 +153,13 @@ select {
 
 #roomList ul {
   text-align: left;
+}
+
+#welcome #name {
+  margin-bottom: 5px;
+}
+
+#welcome #name button.save {
+  background-color: rgb(25, 148, 25);
+  text-align: center;
 }
