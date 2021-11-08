@@ -132,5 +132,16 @@ h1 {
 }
 
 select {
-  margin-top: 16px;;
+  margin-top: 16px;
+}
+
+#roomList {
+  border: solid 2px black;
+  border-radius: 3px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+#roomList ul {
+  text-align: left;
 }

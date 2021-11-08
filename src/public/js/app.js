@@ -107,6 +107,7 @@ function handleNicknameSubmit(event) {
   event.preventDefault();
   const input = welcome.querySelector("#name input");
   socket.emit("nickname", input.value);
+  input.value = "";
 }
 
 async function initCall() {
@@ -169,7 +170,11 @@ socket.on("welcome", async (user, newCount) => {
   myDataChannel.addEventListener("message", (event) => {
     console.log(event.data);
     const data = JSON.parse(event.data);
-    addMessage(`${data.nickname} : ${data.msg}`, "friend");
+    if (data.nickname == "bot") {
+      addMessage(`${data.nickname} : ${user} joined!`, "friend");
+    } else {
+      addMessage(`${user} : ${data.msg}`, "friend");
+    }
   });
   const offer = await myPeerConnection.createOffer();
   myPeerConnection.setLocalDescription(offer);
@@ -177,10 +182,11 @@ socket.on("welcome", async (user, newCount) => {
 });
 
 socket.on("offer", async (offer, user, newCount) => {
+  console.log("I'm Offer!");
   myPeerConnection.addEventListener("datachannel", (event) => {
     myDataChannel = event.channel;
     myDataChannel.send(
-      JSON.stringify({ nickname: "bot", msg: `${user} joined!` })
+      JSON.stringify({ nickname: "bot" })
     );
     myDataChannel.addEventListener("open", () => {
       console.log("open!");
@@ -197,7 +203,7 @@ socket.on("offer", async (offer, user, newCount) => {
     myDataChannel.addEventListener("message", (event) => {
       console.log(event.data);
       const data = JSON.parse(event.data);
-      addMessage(`${data.nickname} : ${data.msg}`, "friend");
+      addMessage(`${user} : ${data.msg}`, "friend");
     });
   });
   myPeerConnection.setRemoteDescription(offer);
@@ -212,6 +218,20 @@ socket.on("answer", (answer) => {
 
 socket.on("ice", (ice) => {
   myPeerConnection.addIceCandidate(ice);
+});
+
+socket.on("room_change", (count, rooms) => {
+  const roomList = welcome.querySelector("#roomList ul");
+  roomList.innerHTML = "";
+  if (rooms.length === 0) {
+    roomList.innerHTML = "";
+    return;
+  }
+  rooms.forEach((room) => {
+    const li = document.createElement("li");
+    li.innerText = `${room} (${count})`;
+    roomList.append(li);
+  });
 });
 
 // RTC Code
