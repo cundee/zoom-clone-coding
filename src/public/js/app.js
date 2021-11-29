@@ -168,6 +168,7 @@ socket.on("welcome", async (user, newCount) => {
   myDataChannel.addEventListener("open", () => {
     console.log("open!");
     const msgForm = call.querySelector("#msg");
+    const content = call.querySelector("#textarea");
     msgForm.addEventListener("submit", (event) => {
       event.preventDefault();
       const input = call.querySelector("#msg input");
@@ -176,11 +177,21 @@ socket.on("welcome", async (user, newCount) => {
       addMessage(`${value}`, user, "my");
       input.value = "";
     });
+    content.addEventListener("compositionupdate", (event) => {
+      event.preventDefault();
+      const value = content.value;
+      myDataChannel.send(JSON.stringify({ content: value }));
+      console.log(value);
+      console.log(JSON.stringify({ content: value }));
+    });
   });
   myDataChannel.addEventListener("message", (event) => {
     console.log(event.data);
     const data = JSON.parse(event.data);
-    if (data.nickname == "bot") {
+    if (data.hasOwnProperty("content")) {
+      const content = call.querySelector("#textarea");
+      content.value = data.content;
+    } else if (data.nickname == "bot") {
       addMessage(`${user} joined!`, "Bot", "friend");
     } else {
       addMessage(`${data.msg}`, user, "friend");
@@ -199,6 +210,7 @@ socket.on("offer", async (offer, user, newCount) => {
     myDataChannel.addEventListener("open", () => {
       console.log("open!");
       const msgForm = call.querySelector("#msg");
+      const content = call.querySelector("#textarea");
       msgForm.addEventListener("submit", (event) => {
         event.preventDefault();
         const input = call.querySelector("#msg input");
@@ -207,11 +219,21 @@ socket.on("offer", async (offer, user, newCount) => {
         addMessage(`${value}`, user, "my");
         input.value = "";
       });
+      content.addEventListener("compositionupdate", (event) => {
+        event.preventDefault();
+        const value = content.value;
+        myDataChannel.send(JSON.stringify({ content: value }));
+      });
     });
     myDataChannel.addEventListener("message", (event) => {
       console.log(event.data);
       const data = JSON.parse(event.data);
-      addMessage(`${data.msg}`, user, "friend");
+      if (data.hasOwnProperty("content")) {
+        const content = call.querySelector("#textarea");
+        content.value = data.content;
+      } else {
+        addMessage(`${data.msg}`, user, "friend");
+      }
     });
   });
   myPeerConnection.setRemoteDescription(offer);
