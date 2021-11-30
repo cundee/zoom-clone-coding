@@ -69,10 +69,9 @@ h1 {
 
 .bubble {
   margin: 5px 0;
-  
+
   max-width: 300px;
   font-size: 14px;
-  
 }
 
 .friend-bubble {
@@ -162,4 +161,83 @@ select {
 #welcome #name button.save {
   background-color: rgb(25, 148, 25);
   text-align: center;
+}
+
+.container {
+  position: relative;
+  display: grid;
+  /* border : 4px solid red; */
+  grid-template-columns: 350px 100px;
+  grid-template-areas:
+    "message button"
+    "canvas canvas";
+}
+
+canvas {
+  grid-area: canvas;
+  /* position: absolute; */
+  border: 4px solid violet;
+  margin-left: 1vw;
+  top: 5vh;
+  z-index: 1;
+}
+
+.message {
+  /* position: absolute; */
+  padding-left: 100px;
+  grid-area: message;
+  font-size: 30px;
+  font-weight: bolder;
+  text-align: center;
+  /* width: 400px;
+  height: 50px; */
+  /* border : 2px solid green; */
+}
+
+.buttons {
+  grid-area: button;
+  height: 30px;
+  align-self: center;
+  /* border : 2px solid purple; */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "withdraw restart";
+}
+
+#reload {
+  grid-area: restart;
+  top: 0px;
+  left: 150px;
+  width: 90px;
+  font: 18px bold;
+}
+
+.winShow1 {
+  position: absolute;
+  /* z-index: -1; */
+  visibility: hidden;
+  left: 240px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  text-align: center;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 40px;
+  font-weight: bolder;
+}
+.winShow2 {
+  position: absolute;
+  /* z-index: -1; */
+  visibility: hidden;
+  left: 240px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: black;
+  text-align: center;
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 40px;
+  color: white;
+  font-weight: bolder;
 }

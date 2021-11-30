@@ -40,6 +40,13 @@ html(lang="en")
                     select#cameras
                     textarea#textarea(type="text", cols="150", rows="20", spellcheck="false") 
                     p ※한글이 아닌 영어, 숫자, 특수문자의 경우 마지막에 한글을 입력해야 상대방의 화면에도 적용됩니다.
+                    div.container
+                        div.message 오목
+                        div.buttons
+                            button#reload Reload
+                        div.winShow1 검정색 승리!
+                        div.winShow2 하얀색 승리!
+                        canvas#canvas
                          
         script(src="/socket.io/socket.io.js")
         script(src="/public/js/app.js")
