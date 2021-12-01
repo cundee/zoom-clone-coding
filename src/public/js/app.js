@@ -152,6 +152,7 @@ function addMessage(message, user, sender) {
   chat.appendChild(name);
   chat.appendChild(bubble);
   div.appendChild(chat);
+  div.scrollTop = div.scrollHeight;
 }
 
 // function handleMessageSubmit(event) {
@@ -174,14 +175,16 @@ socket.on("welcome", async (user, newCount) => {
       event.preventDefault();
       const input = call.querySelector("#msg input");
       const value = input.value;
-      myDataChannel.send(JSON.stringify({ type:'message',nickname: user, msg: value }));
+      myDataChannel.send(
+        JSON.stringify({ type: "message", nickname: user, msg: value })
+      );
       addMessage(`${value}`, user, "my");
       input.value = "";
     });
     content.addEventListener("compositionupdate", (event) => {
       event.preventDefault();
       const value = content.value;
-      myDataChannel.send(JSON.stringify({ type: 'content',content: value }));
+      myDataChannel.send(JSON.stringify({ type: "content", content: value }));
       console.log(value);
       console.log(JSON.stringify({ content: value }));
     });
@@ -189,12 +192,12 @@ socket.on("welcome", async (user, newCount) => {
   myDataChannel.addEventListener("message", (event) => {
     console.log(event.data);
     const data = JSON.parse(event.data);
-    if (data.type == 'content') {
+    if (data.type == "content") {
       const content = call.querySelector("#textarea");
       content.value = data.content;
     } else if (data.type == "bot") {
       addMessage(`${user} joined!`, "Bot", "friend");
-    } else if (data.type == 'message'){
+    } else if (data.type == "message") {
       addMessage(`${data.msg}`, user, "friend");
     }
   });
@@ -208,7 +211,7 @@ socket.on("offer", async (offer, user, newCount) => {
   myPeerConnection.addEventListener("datachannel", (event) => {
     myDataChannel = event.channel;
     gameStart();
-    myDataChannel.send(JSON.stringify({ type:"bot"}));
+    myDataChannel.send(JSON.stringify({ type: "bot" }));
     myDataChannel.addEventListener("open", () => {
       console.log("open!");
       const msgForm = call.querySelector("#msg");
@@ -217,14 +220,16 @@ socket.on("offer", async (offer, user, newCount) => {
         event.preventDefault();
         const input = call.querySelector("#msg input");
         const value = input.value;
-        myDataChannel.send(JSON.stringify({ type:"message",nickname: user, msg: value }));
+        myDataChannel.send(
+          JSON.stringify({ type: "message", nickname: user, msg: value })
+        );
         addMessage(`${value}`, user, "my");
         input.value = "";
       });
       content.addEventListener("compositionupdate", (event) => {
         event.preventDefault();
         const value = content.value;
-        myDataChannel.send(JSON.stringify({ type:"content",content: value }));
+        myDataChannel.send(JSON.stringify({ type: "content", content: value }));
       });
     });
     myDataChannel.addEventListener("message", (event) => {
@@ -233,7 +238,7 @@ socket.on("offer", async (offer, user, newCount) => {
       if (data.type == "content") {
         const content = call.querySelector("#textarea");
         content.value = data.content;
-      } else if(data.type=='message') {
+      } else if (data.type == "message") {
         addMessage(`${data.msg}`, user, "friend");
       }
     });
@@ -284,9 +289,13 @@ function makeConnection() {
   });
   myPeerConnection.addEventListener("icecandidate", handleIce);
   myPeerConnection.addEventListener("addstream", handleAddStream);
-  myStream
-    .getTracks()
-    .forEach((track) => myPeerConnection.addTrack(track, myStream));
+  try {
+    myStream
+      .getTracks()
+      .forEach((track) => myPeerConnection.addTrack(track, myStream));
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function handleIce(data) {
@@ -339,7 +348,7 @@ function gameStart() {
   }
   btn1.addEventListener("click", () => {
     handleReload();
-    myDataChannel.send(JSON.stringify({ type:'reload' }));
+    myDataChannel.send(JSON.stringify({ type: "reload" }));
   });
 
   draw(); // 빈 바둑판 그리기
@@ -520,7 +529,7 @@ function gameStart() {
           count++;
           drawCircle(x, y);
 
-          myDataChannel.send(JSON.stringify({ type:'omok', x: x, y: y }));
+          myDataChannel.send(JSON.stringify({ type: "omok", x: x, y: y }));
           turn = false;
           console.log(x, y);
         }
@@ -532,10 +541,10 @@ function gameStart() {
   myDataChannel.addEventListener("message", (event) => {
     const data = JSON.parse(event.data);
     console.log(data);
-    if (data.type == 'omok') {
+    if (data.type == "omok") {
       drawDol(data.x, data.y);
       turn = true;
-    } else if (data.type == 'reload') {
+    } else if (data.type == "reload") {
       handleReload();
     }
   });
